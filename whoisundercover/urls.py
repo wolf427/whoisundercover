@@ -1,6 +1,10 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from game_process.AutomicallyCleanUpScheduler import startAutoSche
+
+startAutoSche()
+
 urlpatterns = [
     # Examples:
     # url(r'^$', 'whoisundercover.views.home', name='home'),
