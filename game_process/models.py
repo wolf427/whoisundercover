@@ -37,3 +37,8 @@ class Record(models.Model):
     userCount = models.IntegerField()
     modifiedTime = models.DateTimeField()
     phrase_entry = models.ForeignKey(PhraseEntry,models.SET_NULL,null=True)
+    
+class UserWaitForInitRoom(models.Model):
+    user = models.ForeignKey(User,models.CASCADE)
+    wait_type = models.CharField(max_length=20)
+    wait_time = models.DateTimeField(default=datetime.datetime.now())

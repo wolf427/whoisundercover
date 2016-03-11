@@ -45,22 +45,28 @@ def initRoom(userName, userCount):
     UserInRoomIdentity.objects.create(user=user, room=room, identity="manager", number=0 , aliveOrDead=0)
     initPhrase = getRandomPhrase()
     RoomPhraseRelation.objects.create(room=room, phrase=initPhrase)
+    return room,initPhrase
     
 def joinRoom(userName, roomNum):
     room = Room.objects.filter(roomNum=roomNum)
     bool(room)
     if room.count() == 0:
-        return
+        return None,"房间不存在"
     user, existed = User.objects.get_or_create(userName=userName)
     usersInRoomNow = UserInRoomIdentity.objects.filter(room=room[0]).order_by("-number")[0].number
+    if usersInRoomNow >= room[0].userCount:
+        return None,"房间已满"
     # this user is already in that room
-    if UserInRoomIdentity.objects.filter(user=user, room=room[0]).count() > 0 :
-        return
+    current = UserInRoomIdentity.objects.filter(user=user, room=room[0])
+    if current.count() > 0 :
+        return room[0],current[0]
     
     identity = "civilian"
     if str(usersInRoomNow + 1) in room[0].identityDistribution.split(","):
         identity = "undercover"
-    UserInRoomIdentity.objects.create(user=user, room=room[0], identity=identity, number=usersInRoomNow + 1 , aliveOrDead=1)
+    userInRoomIdentity = UserInRoomIdentity.objects.create(user=user, room=room[0], identity=identity, number=usersInRoomNow + 1 , aliveOrDead=1)
+    return room[0],userInRoomIdentity
+    
     
 def killOnePerson(userNum, roomNum):
     userStatus = UserInRoomIdentity.objects.filter(room__roomNum=roomNum, number=userNum)
