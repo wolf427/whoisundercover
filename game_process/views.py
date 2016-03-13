@@ -7,13 +7,14 @@ from wechat_sdk import WechatConf,WechatBasic
 from django.views.decorators.csrf import csrf_exempt
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
+from game_process.wechat import process_msg
 
 conf = WechatConf(
     token='wolf427', 
-    appid='your_appid', 
-    appsecret='your_appsecret', 
-    encrypt_mode='safe',  # 可选项：normal/compatible/safe，分别对应于 明文/兼容/安全 模式
-    encoding_aes_key='your_encoding_aes_key'  # 如果传入此值则必须保证同时传入 token, appid
+    appid='wxf41039220a281a58', 
+    appsecret='9ad7932f08a4816bb257cac3e5523445', 
+    encrypt_mode='normal',  # 可选项：normal/compatible/safe，分别对应于 明文/兼容/安全 模式
+    encoding_aes_key='rEMVGpxvdPcL3sItiqtWeb0e76j2iclL5WCBXM5017D'  # 如果传入此值则必须保证同时传入 token, appid
 )
 
 # Create your views here.
@@ -46,23 +47,22 @@ def process(request):
     # 关注事件以及不匹配时的默认回复
     response = wechat_instance.response_text(
         content = (
-            '感谢您的关注！\n回复【功能】两个字查看支持的功能，还可以回复任意内容开始聊天'
-            '\n【<a href="http://www.ziqiangxuetang.com">自强学堂手机版</a>】'
+            '暂时没能解析的输入'
             ))
     if isinstance(message, TextMessage):
         # 当前会话内容
         content = message.content.strip()
-        if content == '功能':
-            reply_text = (
-                    '目前支持的功能：\n1. 关键词后面加上【教程】两个字可以搜索教程，'
-                    '比如回复 "Django 后台教程"\n'
-                    '2. 回复任意词语，查天气，陪聊天，讲故事，无所不能！\n'
-                    '还有更多功能正在开发中哦 ^_^\n'
-                    '【<a href="http://www.ziqiangxuetang.com">自强学堂手机版</a>】'
-                )
-        elif content.endswith('教程'):
-            reply_text = '您要找的教程如下：'
- 
+#         if content == '功能':
+#             reply_text = (
+#                     '目前支持的功能：\n1. 关键词后面加上【教程】两个字可以搜索教程，'
+#                     '比如回复 "Django 后台教程"\n'
+#                     '2. 回复任意词语，查天气，陪聊天，讲故事，无所不能！\n'
+#                     '还有更多功能正在开发中哦 ^_^\n'
+#                     '【<a href="http://www.ziqiangxuetang.com">自强学堂手机版</a>】'
+#                 )
+#         elif content.endswith('教程'):
+#             reply_text = '您要找的教程如下：'
+        reply_text = process_msg(message)
         response = wechat_instance.response_text(content=reply_text)
  
     return HttpResponse(response, content_type="application/xml")   
