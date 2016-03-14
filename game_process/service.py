@@ -21,19 +21,19 @@ def getRandomPhrase():
     randomIndex = random.randint(0, PhraseEntry.objects.all().count() - 1)
     return PhraseEntry.objects.all()[randomIndex:randomIndex + 1][0]
 
-def createOneRoom(userCount):
+def create_one_room(userCount):
     room = Room(userCount=userCount)
     while True:
         index = random.randint(1000, 9999)
         if Room.objects.filter(roomNum=index).count() > 0:
             continue
         room.roomNum = index
-        allocationIdentity(room, getUndercoverCount(userCount))
+        allocation_identity(room, getUndercoverCount(userCount))
         room.save()
         break;
     return room;
 
-def allocationIdentity(room, howManyUndercouver):
+def allocation_identity(room, howManyUndercouver):
     identityList = set()
     while len(identityList) < howManyUndercouver:
         identityList.add(random.randint(1, room.userCount))
@@ -42,7 +42,7 @@ def allocationIdentity(room, howManyUndercouver):
 """The manager use this method to init a room"""
 def initRoom(userName, userCount):
     user, existed = User.objects.get_or_create(userName=userName)
-    room = createOneRoom(userCount)
+    room = create_one_room(userCount)
     UserInRoomIdentity.objects.create(user=user, room=room, identity="manager", number=0 , aliveOrDead=0)
     initPhrase = getRandomPhrase()
     RoomPhraseRelation.objects.create(room=room, phrase=initPhrase)

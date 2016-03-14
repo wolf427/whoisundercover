@@ -18,6 +18,7 @@ class Room(models.Model):
     userCount = models.IntegerField()
     identityDistribution = models.CharField(max_length=10,null=True)
     modifiedTime = models.DateTimeField(default=datetime.datetime.now())
+    game_type = models.CharField(max_length=20,null=True)
     
 class RoomPhraseRelation(models.Model):
     room = models.ForeignKey(Room,on_delete=models.CASCADE)
@@ -38,6 +39,7 @@ class Record(models.Model):
     userCount = models.IntegerField()
     modifiedTime = models.DateTimeField()
     phrase_entry = models.ForeignKey(PhraseEntry,on_delete=models.SET_NULL,null=True)
+    game_type = models.CharField(max_length=20,null=True)
     
 class UserWaitForInitRoom(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)

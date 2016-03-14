@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'game_process',
+    'resist_organization',
 )
 
 MIDDLEWARE_CLASSES = (
