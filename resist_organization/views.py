@@ -6,7 +6,8 @@ from resist_organization.models import vote, vote_result
 import datetime
 from resist_organization import wechat
 from resist_organization.service import init_room, join_room, vote_once,\
-    get_current_situation
+    get_current_situation, clear_room
+import re
 
 # Create your views here.
 def process_msg(message):
@@ -22,12 +23,26 @@ def process_msg(message):
             userWaitForInitRoom.wait_time = datetime.datetime.now()
             userWaitForInitRoom.save()
             return wechat.waitForInitRoomReply
+        if content == u"战况":
+            userInRoomIdentity = UserInRoomIdentity.objects.filter(user=user)
+            bool(userInRoomIdentity)
+            if userInRoomIdentity.count()==0:
+                return u"你尚未加入任何游戏"
+            civilian_winned,spy_winned,vote_result_list = get_current_situation(userInRoomIdentity[0].room)
+            return wechat.formate_query_reply(civilian_winned, spy_winned, vote_result_list)
 
         userWaitForInitRoom = UserWaitForInitRoom.objects.filter(user=user)
         bool(userWaitForInitRoom)
         if userWaitForInitRoom.count() > 0:
             if userWaitForInitRoom[0].wait_type == "resist_organization":
                 return init_resist_organization_room(message,userWaitForInitRoom)
+        elif re.match('^[\d]{4}$', content):
+            want_join_room_num = int(content)
+            room,msg = join_room(message.source,want_join_room_num)
+            if room == None:
+                return msg
+            else:
+                return wechat.formateJoinRoom(room, msg)
         elif UserInRoomIdentity.objects.filter(user=user).count()>0:
             is_game_over,result = None,None
             if content == u"支持":
@@ -36,25 +51,18 @@ def process_msg(message):
                 is_game_over,result = vote_once(message.source,"break")
             
             if is_game_over:
-                civilian_winned,spy_winned,vote_result_list = get_current_situation(UserInRoomIdentity.objects.filter(user=user)[0].room)
+                room = UserInRoomIdentity.objects.filter(user=user)[0].room
+                civilian_winned,spy_winned,vote_result_list = get_current_situation(room)
+                clear_room(room)
                 return wechat.formate_game_over_reply(civilian_winned, spy_winned, vote_result_list)
             else:
                 if result == None:
-                    return u"等待最后一个人投票"
+                    return u"等待本轮投票结束"
                 else:
                     civilian_winned,spy_winned,round_result = get_current_situation(UserInRoomIdentity.objects.filter(user=user)[0].room)
                     return wechat.formateVoteReply(result,civilian_winned,spy_winned)
                     
-        else:
-            if content.isdigit():
-                want_join_room_num = int(content)
-                room,msg = join_room(message.source,want_join_room_num)
-                if room == None:
-                    return msg
-                else:
-                    return wechat.formateJoinRoom(room, msg)
-            else:
-                return u"未能解析"
+            
             
 def init_resist_organization_room(message,userWaitForInitRoom):
     join_count = -1
@@ -65,10 +73,12 @@ def init_resist_organization_room(message,userWaitForInitRoom):
         return u"非数字，请输入5-12之间的数字"
     if join_count < 5 or join_count > 12:
         return u"请输入5-12之间的数字"
-    room = init_room(message.source,join_count,userWaitForInitRoom.wait_type)
+    room = init_room(message.source,join_count,userWaitForInitRoom[0].wait_type)
     userWaitForInitRoom.delete()
     return wechat.formatInitRoomReply(room)
     
+def clear_user_data(user_name):
+    UserInRoomIdentity.objects.filter(user__userName=user_name).delete()
     
     
     

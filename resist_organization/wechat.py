@@ -5,29 +5,33 @@ Created on Mar 14, 2016
 @author: yufeitan
 '''
 initRoomReply=u"""建房成功，请参与游戏人员直接输入房号【%d】加入游戏\n
-                房号：  %d\n
-                人数：  %d间谍  %d自由战士\n
-                间谍：  %s\n
-                """
+房号：  %d\n
+人数：  %d间谍  %d自由战士\n
+间谍：  %s\n
+"""
 joinRoomReply=u"""成功加入%d房间\n
-                你的身份为%s\n
-                你的号码为%d\n
-        %s\n
-                当你被选中投票时，直接回复【支持】（支持行动）或是【破坏】破坏行动
-                """
+你的身份为%s\n
+你的号码为%d\n
+%s\n
+当你被选中投票时，直接回复【支持】（支持行动）或是【破坏】破坏行动
+"""
                 
 voteReply=u"""
-                第【%d】轮投票结束，投票结果：\n
-                【%d】支持，【%d】破坏\n
-                本轮任务：%s\n
-                当前比分：%d：%d（战士：间谍）
+第【%d】轮投票结束，投票结果：\n
+【%d】支持，【%d】破坏\n
+本轮任务：%s\n
+当前比分：%d：%d（战士：间谍）
 """
 waitForInitRoomReply=u"""抵抗组织创建成功，请输入游戏人数【5-12】"""
 gameOverReply=u"""
-                游戏结束，%s胜利\n
-                最终比分：%d：%d（战：谍）
-                游戏过程如下：\n
-                轮数 战：谍 得分\n
+游戏结束，%s胜利\n
+最终比分：%d：%d（战：谍）\n
+游戏过程如下：\n
+轮数 战：谍 得分\n
+"""
+queryReply=u"""
+当前比分：%d:%d\n
+轮数 战：谍  得分方\n
 """
 
 
@@ -62,12 +66,21 @@ def formate_game_over_reply(civilian_winned,spy_winned,vote_result_list):
         winner_side = u"战"
         if each_vote_result.which_side_get_point == "spy":
             winner_side = u"谍"
-        final_result += (str(each_vote_result.vote_sequence)+u"轮"+str(each_vote_result.civilian_vote_count)+"："+\
-                         str(each_vote_result.spy_vote_count)+" "+winner_side+"\n")
+        final_result += (str(each_vote_result.vote_sequence)+u"轮 "+str(each_vote_result.civilian_vote_count)+u"："+\
+                         str(each_vote_result.spy_vote_count)+u" "+winner_side+u"\n")
         
     return final_result
     
-    
+def formate_query_reply(civilian_winned,spy_winned,vote_result_list):
+    current_result = queryReply %(civilian_winned,spy_winned)
+    for each_vote_result in vote_result_list:
+        winner_side = u"战"
+        if each_vote_result.which_side_get_point == "spy":
+            winner_side = u"谍"
+        current_result += (str(each_vote_result.vote_sequence)+u"轮 "+str(each_vote_result.civilian_vote_count)+u"："+\
+                         str(each_vote_result.spy_vote_count)+u" "+winner_side+u"\n")
+        
+    return current_result
     
     
     

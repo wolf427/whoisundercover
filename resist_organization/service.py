@@ -112,18 +112,25 @@ def join_room(userName, roomNum):
 def vote_once(userName,vote_type):
     #vote_type:support/break
     userInRoomIdentity = UserInRoomIdentity.objects.get(user__userName=userName)
+    room = userInRoomIdentity.room
+    room.modifiedTime = datetime.now()
+    room.save()
     latast_vote_result = vote_result.objects.filter(room=userInRoomIdentity.room)
     bool(latast_vote_result)
     current_vote_sequence = latast_vote_result.count()+1
+    
+    #an user can only vote once at each round
+    if vote.objects.filter(user=userInRoomIdentity.user,vote_sequence=current_vote_sequence).count()>0:
+        return False,None
+    
     vote.objects.create(user=userInRoomIdentity.user,room=userInRoomIdentity.room,vote_sequence=current_vote_sequence,vote_content=vote_type)
     current_vote_result = calculate_one_round_result(current_vote_sequence)
     is_game_over,winner_side = whether_game_over(userInRoomIdentity.room)
     if is_game_over:
-        clear_room(userInRoomIdentity.room)
         return True,winner_side
     else:
         return False,current_vote_result
-    
+#if all users have been voted, then calculate the result of this round and return it
 def calculate_one_round_result(vote_sequence):
     vote_list = vote.objects.filter(vote_sequence=vote_sequence)
     bool(vote_list)
