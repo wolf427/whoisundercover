@@ -37,7 +37,7 @@ def process(request):
      
      # 解析本次请求的 XML 数据
     try:
-        wechat_instance.parse_data(data=request.body)
+        wechat_instance.parse_data(data=request.body.decode('utf-8'))
     except ParseError:
         return HttpResponseBadRequest('Invalid XML Data')
  
