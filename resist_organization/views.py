@@ -30,6 +30,8 @@ def process_msg(message):
                 return u"你尚未加入任何游戏"
             civilian_winned,spy_winned,vote_result_list = get_current_situation(userInRoomIdentity[0].room)
             return wechat.formate_query_reply(civilian_winned, spy_winned, vote_result_list)
+        if content == u"规则":
+            return wechat.resist_organization_rule
 
         userWaitForInitRoom = UserWaitForInitRoom.objects.filter(user=user)
         bool(userWaitForInitRoom)

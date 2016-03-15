@@ -143,7 +143,7 @@ def calculate_one_round_result(vote_sequence):
             if each_vote.vote_content == "break":
                 spies_vote_count += 1
         
-        if which_side_get_point(vote_sequence, totalUserCount, spies_vote_count) ==1:
+        if which_side_get_point(vote_sequence, totalUserCount, spies_vote_count) == 1:
             return vote_result.objects.create(room=vote_list[0].room,vote_sequence=vote_sequence,\
                                        spy_vote_count=spies_vote_count,\
                                        civilian_vote_count=how_many_user_vote(vote_sequence,totalUserCount)-spies_vote_count,\

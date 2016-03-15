@@ -4,10 +4,16 @@ Created on Mar 14, 2016
 
 @author: yufeitan
 '''
+resist_organization_rule=u"""游戏分【自由战士】与【间谍】两个阵营，五局三胜。每局执行一次任务，选出部分参与者投票（如八人局，第一轮选3人，第二轮选4人。。。），
+每局任务开始前讨论，由一人提出参与该任务人选并阐述理由，其他玩家也可依次对该方案做点评，一轮讨论后投票，超过半数同意则该方案通过，否则由下一玩家提出方案，
+直至有一种方案通过（都不通过则执行第一个方案）。任务执行者可选择投【支持】或是【破坏】，若最终该轮任务收到的“破坏”超过限制则任务失败（如八人局第一轮只要有一个
+“破坏”则任务失败，而第四轮则至少有两个“破坏”任务失败），任务失败间谍记一分，反之自由战士记一分，先赢得三分的队伍胜利。
+"""
 initRoomReply=u"""建房成功，请参与游戏人员直接输入房号【%d】加入游戏\n
 房号：  %d\n
 人数：  %d间谍  %d自由战士\n
 间谍：  %s\n
+各局得分条件(破坏人数/投票人数)：\n
 """
 joinRoomReply=u"""成功加入%d房间\n
 你的身份为%s\n
@@ -37,8 +43,9 @@ queryReply=u"""
 
 def formatInitRoomReply(room):
     spiesCount = room.identityDistribution.split(",")
-    return initRoomReply %(room.roomNum,room.roomNum,len(spiesCount),room.userCount-len(spiesCount)\
-                           ,room.identityDistribution)
+    
+    return (initRoomReply %(room.roomNum,room.roomNum,len(spiesCount),room.userCount-len(spiesCount)\
+                           ,room.identityDistribution))+get_point_requirement(room.userCount)
     
 def formateJoinRoom(room,identity):
     identity_str = ""
@@ -83,4 +90,15 @@ def formate_query_reply(civilian_winned,spy_winned,vote_result_list):
     return current_result
     
     
-    
+def get_point_requirement(user_count):
+    if user_count == 5:
+        return u"1/2 1/3 1/2 1/3 1/3"
+    elif user_count == 6:
+        return u"1/2 1/3 1/4 1/3 1/4"
+    elif user_count == 7 :
+        return u"1/2 1/3 1/3 2/4 1/4"
+    elif user_count == 8 or user_count == 9 or user_count == 10 or user_count == 11 or user_count == 12:
+        return u"1/3 1/4 1/4 2/5 1/5"
+        
+        
+        
