@@ -112,7 +112,8 @@ def deleteOutdatedRecord(roomNum):
 def automicallyCleanUp():
     rooms = Room.objects.filter(modifiedTime__lt=(datetime.now()-timedelta(hours=0.5)))
     for room in rooms:
-        Record.objects.create(userCount=room.userCount, modifiedTime=room.modifiedTime, phrase_entry=RoomPhraseRelation.objects.get(room=room).phrase)
+        if room.game_type == "resist_organization":
+            Record.objects.create(userCount=room.userCount, modifiedTime=room.modifiedTime, game_type=room.game_type)
     rooms.delete()
 
 
