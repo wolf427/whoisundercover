@@ -32,7 +32,12 @@ def process_msg(message):
             return wechat.formate_query_reply(civilian_winned, spy_winned, vote_result_list)
         if content == u"规则":
             return wechat.resist_organization_rule
-
+        if content == u"结束":
+            userInRoomIdentity = UserInRoomIdentity.objects.filter(user=user)
+            bool(userInRoomIdentity)
+            if userInRoomIdentity.count() > 0 :
+                clear_room(userInRoomIdentity[0].room)
+        
         userWaitForInitRoom = UserWaitForInitRoom.objects.filter(user=user)
         bool(userWaitForInitRoom)
         if userWaitForInitRoom.count() > 0:
@@ -68,7 +73,6 @@ def process_msg(message):
             
 def init_resist_organization_room(message,userWaitForInitRoom):
     join_count = -1
-    print message.content.strip()
     try:
         join_count = int(message.content.strip())
     except:
@@ -82,6 +86,7 @@ def init_resist_organization_room(message,userWaitForInitRoom):
 def clear_user_data(user_name):
     UserInRoomIdentity.objects.filter(user__userName=user_name).delete()
     
+
     
     
     

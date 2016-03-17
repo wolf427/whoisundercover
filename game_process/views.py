@@ -7,12 +7,13 @@ from wechat_sdk import WechatConf,WechatBasic
 from django.views.decorators.csrf import csrf_exempt
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
-from game_process.wechat import process_msg
+from resist_organization.views import process_msg
+from resist_organization import wechat
 
 conf = WechatConf(
     token='wolf427', 
-    appid='wxf41039220a281a58', 
-    appsecret='9ad7932f08a4816bb257cac3e5523445', 
+    appid='wx84482dcc4f137d43', 
+    appsecret='434f96eaed9dac9aa79905e9d51618b3', 
     encrypt_mode='normal',  # 可选项：normal/compatible/safe，分别对应于 明文/兼容/安全 模式
     encoding_aes_key='rEMVGpxvdPcL3sItiqtWeb0e76j2iclL5WCBXM5017D'  # 如果传入此值则必须保证同时传入 token, appid
 )
@@ -47,7 +48,7 @@ def process(request):
     # 关注事件以及不匹配时的默认回复
     response = wechat_instance.response_text(
         content = (
-            '暂时没能解析的输入'
+            wechat.nothing_reply
             ))
     if isinstance(message, TextMessage):
         # 当前会话内容
@@ -63,6 +64,8 @@ def process(request):
 #         elif content.endswith('教程'):
 #             reply_text = '您要找的教程如下：'
         reply_text = process_msg(message)
+        if reply_text == None:
+            reply_text = wechat.nothing_reply
         response = wechat_instance.response_text(content=reply_text)
  
     return HttpResponse(response, content_type="application/xml")   
