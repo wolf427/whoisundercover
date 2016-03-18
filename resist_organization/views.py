@@ -42,10 +42,10 @@ def process_msg(message):
         bool(userWaitForInitRoom)
         if userWaitForInitRoom.count() > 0:
             if userWaitForInitRoom[0].wait_type == "resist_organization":
-                return init_resist_organization_room(message,userWaitForInitRoom)
+                return init_resist_organization_room(user,message,userWaitForInitRoom)
         elif re.match('^[\d]{4}$', content):
             want_join_room_num = int(content)
-            room,msg = join_room(message.source,want_join_room_num)
+            room,msg = join_room(user,want_join_room_num)
             if room == None:
                 return msg
             else:
@@ -53,9 +53,9 @@ def process_msg(message):
         elif UserInRoomIdentity.objects.filter(user=user).count()>0:
             is_game_over,result = None,None
             if content == u"支持":
-                is_game_over,result = vote_once(message.source,"support")
+                is_game_over,result = vote_once(user,"support")
             elif content == u"破坏":
-                is_game_over,result = vote_once(message.source,"break")
+                is_game_over,result = vote_once(user,"break")
             
             if is_game_over:
                 room = UserInRoomIdentity.objects.filter(user=user)[0].room
@@ -68,10 +68,12 @@ def process_msg(message):
                 else:
                     civilian_winned,spy_winned,round_result = get_current_situation(UserInRoomIdentity.objects.filter(user=user)[0].room)
                     return wechat.formateVoteReply(result,civilian_winned,spy_winned)
+        else:
+            return wechat.nothing_reply
                     
             
             
-def init_resist_organization_room(message,userWaitForInitRoom):
+def init_resist_organization_room(user,message,userWaitForInitRoom):
     join_count = -1
     try:
         join_count = int(message.content.strip())
@@ -79,7 +81,7 @@ def init_resist_organization_room(message,userWaitForInitRoom):
         return u"非数字，请输入5-12之间的数字"
     if join_count < 5 or join_count > 12:
         return u"请输入5-12之间的数字"
-    room = init_room(message.source,join_count,userWaitForInitRoom[0].wait_type)
+    room = init_room(user,join_count,userWaitForInitRoom[0].wait_type)
     userWaitForInitRoom.delete()
     return wechat.formatInitRoomReply(room)
     
