@@ -34,6 +34,7 @@ queryReply=u"""
 """
 nothing_reply=u"""输入【抵抗组织】建立房间，输入【规则】查看游戏规则，任何时候输入【结束】结束当前游戏"""
 
+vote_fail_reply=u"""投票失败，输入【支持】或是【破坏】才能投票，或是输入【战况】查看战局，输入【结束】结束当前游戏"""
 
 def formatInitRoomReply(room):
     spiesCount = room.identityDistribution.split(",")

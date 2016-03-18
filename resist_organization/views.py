@@ -56,6 +56,8 @@ def process_msg(message):
                 is_game_over,result = vote_once(user,"support")
             elif content == u"破坏":
                 is_game_over,result = vote_once(user,"break")
+            else:
+                return wechat.vote_fail_reply
             
             if is_game_over:
                 room = UserInRoomIdentity.objects.filter(user=user)[0].room
