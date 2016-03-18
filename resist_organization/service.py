@@ -83,23 +83,24 @@ def allocation_identity(room, howManySpies):
     room.identityDistribution = ",".join(map(str, identityList))
 
 """The manager use this method to init a room"""
-def init_room(userName, userCount,wait_type):
-    user, existed = User.objects.get_or_create(userName=userName)
+def init_room(user, userCount,wait_type):
+#     user, existed = User.objects.get_or_create(userName=userName)
     room = create_one_room(userCount,wait_type)
     UserInRoomIdentity.objects.create(user=user, room=room, identity="manager", number=0 , aliveOrDead=0)
     return room
     
-def join_room(userName, roomNum):
+def join_room(user, roomNum):
     room = Room.objects.filter(roomNum=roomNum)
     bool(room)
     if room.count() == 0:
         return None,u"房间不存在"
-    user, existed = User.objects.get_or_create(userName=userName)
+#     user, existed = User.objects.get_or_create(userName=userName)
     usersInRoomNow = UserInRoomIdentity.objects.filter(room=room[0]).order_by("-number")[0].number
     if usersInRoomNow >= room[0].userCount:
         return None,u"房间已满"
     # this user is already in that room
     current = UserInRoomIdentity.objects.filter(user=user, room=room[0])
+    bool(current)
     if current.count() > 0 :
         return room[0],current[0]
     
@@ -109,9 +110,9 @@ def join_room(userName, roomNum):
     userInRoomIdentity = UserInRoomIdentity.objects.create(user=user, room=room[0], identity=identity, number=usersInRoomNow + 1 , aliveOrDead=1)
     return room[0],userInRoomIdentity
 
-def vote_once(userName,vote_type):
+def vote_once(user,vote_type):
     #vote_type:support/break
-    userInRoomIdentity = UserInRoomIdentity.objects.get(user__userName=userName)
+    userInRoomIdentity = UserInRoomIdentity.objects.get(user=user)
     room = userInRoomIdentity.room
     room.modifiedTime = datetime.now()
     room.save()
@@ -120,21 +121,21 @@ def vote_once(userName,vote_type):
     current_vote_sequence = latast_vote_result.count()+1
     
     #an user can only vote once at each round
-    if vote.objects.filter(user=userInRoomIdentity.user,vote_sequence=current_vote_sequence).count()>0:
+    if vote.objects.filter(user=user,vote_sequence=current_vote_sequence).count()>0:
         return False,None
     
-    vote.objects.create(user=userInRoomIdentity.user,room=userInRoomIdentity.room,vote_sequence=current_vote_sequence,vote_content=vote_type)
-    current_vote_result = calculate_one_round_result(current_vote_sequence)
+    vote.objects.create(user=user,room=userInRoomIdentity.room,vote_sequence=current_vote_sequence,vote_content=vote_type)
+    current_vote_result = calculate_one_round_result(room,current_vote_sequence)
     is_game_over,winner_side = whether_game_over(userInRoomIdentity.room)
     if is_game_over:
         return True,winner_side
     else:
         return False,current_vote_result
 #if all users have been voted, then calculate the result of this round and return it
-def calculate_one_round_result(vote_sequence):
-    vote_list = vote.objects.filter(vote_sequence=vote_sequence)
+def calculate_one_round_result(room,vote_sequence):
+    vote_list = vote.objects.filter(room=room,vote_sequence=vote_sequence)
     bool(vote_list)
-    totalUserCount = vote_list[0].room.userCount
+    totalUserCount = room.userCount
     if vote_list.count() < how_many_user_vote(vote_sequence,totalUserCount):
         return None
     else:
