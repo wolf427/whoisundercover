@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from wechat_sdk.messages import TextMessage
-from game_process.models import User, UserInRoomIdentity, UserWaitForInitRoom
+from game_process.models import User, UserInRoomIdentity, UserWaitForInitRoom,\
+    Room
 from resist_organization.models import vote, vote_result
 import datetime
 from resist_organization import wechat
 from resist_organization.service import init_room, join_room, vote_once,\
     get_current_situation, clear_room
 import re
+from guess_word.views import get_rondom_word
 
 # Create your views here.
 def process_msg(message):
@@ -37,7 +39,10 @@ def process_msg(message):
             bool(userInRoomIdentity)
             if userInRoomIdentity.count() > 0 :
                 clear_room(userInRoomIdentity[0].room)
-        
+        if content == u"猜词":
+            return get_rondom_word()
+        if content == u"换":
+            return get_rondom_word()
         userWaitForInitRoom = UserWaitForInitRoom.objects.filter(user=user)
         bool(userWaitForInitRoom)
         if userWaitForInitRoom.count() > 0:
